@@ -8,6 +8,8 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -31,6 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: build-test
+    permissions:
+      contents: read
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -41,11 +45,15 @@ jobs:
           node-version: 20
 
       - name: Deploy to Vercel (optional)
-        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        if: secrets.VERCEL_TOKEN != ''
         run: npx vercel --prod --token "${{ secrets.VERCEL_TOKEN }}"
 
       - name: Deploy Solana Program (optional)
-        if: ${{ secrets.ANCHOR_WALLET != '' }}
+        if: secrets.ANCHOR_WALLET != ''
         run: |
-          anchor build
-          anchor deploy --provider.cluster devnet
+          if command -v anchor >/dev/null 2>&1; then
+            anchor build
+            anchor deploy --provider.cluster devnet
+          else
+            echo "Anchor CLI not available on runner; skipping."
+          fi

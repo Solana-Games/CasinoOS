@@ -1,8 +1,26 @@
 const crypto = require('node:crypto');
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@admin.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-const SECRET = process.env.ADMIN_SECRET || 'scatter-secret';
+const DEFAULT_ADMIN_EMAIL = 'admin@admin.com';
+const DEFAULT_ADMIN_PASSWORD = 'admin123';
+const DEFAULT_SECRET = 'scatter-secret';
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+const SECRET = process.env.ADMIN_SECRET || DEFAULT_SECRET;
+
+function enforceSecureProductionConfig() {
+  if (process.env.NODE_ENV !== 'production') return;
+
+  if (
+    ADMIN_EMAIL === DEFAULT_ADMIN_EMAIL ||
+    ADMIN_PASSWORD === DEFAULT_ADMIN_PASSWORD ||
+    SECRET === DEFAULT_SECRET
+  ) {
+    throw new Error(
+      'Production requires ADMIN_EMAIL, ADMIN_PASSWORD, and ADMIN_SECRET to be set securely.'
+    );
+  }
+}
 
 function sign(payload) {
   const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
@@ -19,6 +37,7 @@ function verify(token) {
 }
 
 function login(email, password) {
+  enforceSecureProductionConfig();
   if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) return null;
   return sign({ role: 'admin', email, issuedAt: Date.now() });
 }

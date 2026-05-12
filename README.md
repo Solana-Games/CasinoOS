@@ -19,6 +19,7 @@ Production-focused scaffold for a modular, blockchain-native casino platform.
 - Password: `admin123`
 
 Override via environment variables from `config/.env.example`.
+In production (`NODE_ENV=production`), `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_SECRET` must be set to non-default values.
 
 ## Local usage
 
