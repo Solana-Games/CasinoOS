@@ -119,11 +119,12 @@ pub mod casinoos_escrow {
         ctx: Context<SettleRound>,
         server_seed: [u8; 32],
         nonce: u64,
+        jackpot_winner: Option<Pubkey>,
         payouts: Vec<Payout>,
     ) -> Result<()> {
         require!(!ctx.accounts.round.settled, CasinoError::RoundSettled);
         require!(Clock::get()?.slot >= ctx.accounts.round.close_slot, CasinoError::RoundStillOpen);
-        require!(!payouts.is_empty() && payouts.len() <= MAX_PAYOUTS, CasinoError::InvalidPayoutSet);
+        require!(payouts.len() <= MAX_PAYOUTS, CasinoError::InvalidPayoutSet);
         require!(
             payouts.len() == ctx.remaining_accounts.len(),
             CasinoError::PayoutAccountsMismatch
@@ -211,13 +212,25 @@ pub mod casinoos_escrow {
             )?;
         }
 
-        if server_seed[nonce as usize % server_seed.len()] == JACKPOT_TRIGGER_BYTE {
+        let jackpot_trigger_hash = hashv(&[
+            &server_seed,
+            &nonce.to_le_bytes(),
+            &ctx.accounts.round.round_id.to_le_bytes(),
+            &ctx.accounts.round.total_wager_lamports.to_le_bytes(),
+        ])
+        .to_bytes();
+        if jackpot_trigger_hash[0] == JACKPOT_TRIGGER_BYTE {
             let jackpot_balance = **ctx.accounts.jackpot_vault.to_account_info().lamports.borrow();
-            if jackpot_balance > 0 {
-                let jackpot_winner = &ctx.remaining_accounts[0];
+            if jackpot_balance > 0 && jackpot_winner.is_some() {
+                let winner_key = jackpot_winner.ok_or(CasinoError::InvalidJackpotWinner)?;
+                let jackpot_winner_account = ctx
+                    .remaining_accounts
+                    .iter()
+                    .find(|account| account.key() == winner_key)
+                    .ok_or(CasinoError::InvalidJackpotWinner)?;
                 transfer_lamports(
                     &ctx.accounts.jackpot_vault.to_account_info(),
-                    jackpot_winner,
+                    jackpot_winner_account,
                     jackpot_balance,
                     &ctx.accounts.system_program.to_account_info(),
                     &[&[
@@ -429,4 +442,6 @@ pub enum CasinoError {
     PayoutAccountsMismatch,
     #[msg("NFT multiplier BPS must be between 10000 and 20000.")]
     InvalidNftMultiplier,
+    #[msg("Jackpot winner account is invalid or missing.")]
+    InvalidJackpotWinner,
 }

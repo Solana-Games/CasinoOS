@@ -43,6 +43,19 @@ test('prepare bridge supports external serverSeed option', () => {
   assert.equal(payload.commitHash.length, 32);
 });
 
+test('prepare bridge supports preparedRound.serverSeed naming', () => {
+  const payload = fromPreparedSyncedRound({
+    roundId: 10,
+    serverSeed: 'seed-10'
+  }, {
+    minBetLamports: 3_000,
+    closeSlot: 33_000
+  });
+
+  assert.equal(payload.roundId, 10);
+  assert.equal(payload.commitHash.length, 32);
+});
+
 test('settle payload enforces payout bps bounds', () => {
   assert.throws(
     () =>
@@ -67,6 +80,7 @@ test('resolved synced round maps winners into settle payload', () => {
 
   assert.equal(settle.serverSeed.length, 32);
   assert.equal(settle.nonce, 4);
+  assert.equal(settle.jackpotWinner, 'p2');
   assert.deepEqual(
     settle.payouts.map((item) => item.player),
     ['p1', 'p2']
@@ -75,4 +89,18 @@ test('resolved synced round maps winners into settle payload', () => {
     settle.payouts.reduce((sum, item) => sum + item.bps, 0),
     10_000
   );
+});
+
+test('resolved synced round supports zero-winner payload', () => {
+  const settle = fromResolvedSyncedRound({
+    roundId: 5,
+    reveal: { serverSeed: 'zero-winner-seed' },
+    playerOutcomes: [
+      { playerId: 'p1', totalWin: 0 },
+      { playerId: 'p2', totalWin: 0 }
+    ]
+  });
+
+  assert.equal(settle.payouts.length, 0);
+  assert.equal(settle.jackpotWinner, null);
 });

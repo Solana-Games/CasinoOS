@@ -50,13 +50,13 @@ function fromPreparedSyncedRound(preparedRound, options = {}) {
   if (!preparedRound || typeof preparedRound !== 'object') {
     throw new TypeError('preparedRound must be an object');
   }
-  if (!preparedRound.reveal?.serverSeed && !options.serverSeed) {
-    throw new TypeError('serverSeed is required via preparedRound.reveal.serverSeed or options.serverSeed');
+  if (!preparedRound.serverSeed && !preparedRound.reveal?.serverSeed && !options.serverSeed) {
+    throw new TypeError('serverSeed is required via preparedRound.serverSeed or options.serverSeed');
   }
 
   return buildCreateRoundInstructionData({
     roundId: preparedRound.roundId,
-    serverSeed: options.serverSeed || preparedRound.reveal.serverSeed,
+    serverSeed: options.serverSeed || preparedRound.serverSeed || preparedRound.reveal?.serverSeed,
     minBetLamports: options.minBetLamports || 1_000_000,
     closeSlot: options.closeSlot || 1,
     jackpotBps: options.jackpotBps ?? 100
@@ -66,6 +66,7 @@ function fromPreparedSyncedRound(preparedRound, options = {}) {
 function buildSettleRoundInstructionData({
   serverSeed,
   nonce = 0,
+  jackpotWinner = null,
   winnerPayoutBps = []
 } = {}) {
   if (!Buffer.isBuffer(serverSeed) && !(Array.isArray(serverSeed) && serverSeed.length === 32)) {
@@ -98,6 +99,7 @@ function buildSettleRoundInstructionData({
   return {
     serverSeed: serverSeedBytes,
     nonce: normalizedNonce,
+    jackpotWinner: jackpotWinner ? String(jackpotWinner) : null,
     payouts: normalizedPayouts
   };
 }
@@ -120,14 +122,23 @@ function fromResolvedSyncedRound(resolvedRound) {
         const consumed = eligible
           .slice(0, -1)
           .reduce((sum, prior) => sum + Math.floor((Number(prior.totalWin) / totalWins) * 10_000), 0);
-        return { player: item.playerId, bps: 10_000 - consumed };
+        const remainder = 10_000 - consumed;
+        if (remainder < 0) {
+          throw new TypeError('winner payout remainder is negative');
+        }
+        return { player: item.playerId, bps: remainder };
       }
       return { player: item.playerId, bps: Math.floor((Number(item.totalWin) / totalWins) * 10_000) };
     });
 
+  const jackpotWinner = eligible.length === 0
+    ? null
+    : eligible.reduce((best, item) => (Number(item.totalWin) > Number(best.totalWin) ? item : best)).playerId;
+
   return buildSettleRoundInstructionData({
     serverSeed: resolvedRound.reveal.serverSeed,
     nonce: Number(resolvedRound.roundId) || 0,
+    jackpotWinner,
     winnerPayoutBps: payouts
   });
 }
