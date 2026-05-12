@@ -1,4 +1,5 @@
 const crypto = require('node:crypto');
+const { createDeterministicRng } = require('./commitRevealRng');
 
 const SYMBOLS = ['ACE', 'KING', 'QUEEN', 'JACK', 'SCATTER', 'WILD'];
 const PAYOUTS = {
@@ -10,13 +11,21 @@ const PAYOUTS = {
   WILD: 15
 };
 
-function randomSymbol() {
-  return SYMBOLS[crypto.randomInt(0, SYMBOLS.length)];
+function randomSymbol(randomInt) {
+  return SYMBOLS[randomInt(0, SYMBOLS.length)];
 }
 
-function spinGrid() {
+function resolveRandomInt(randomSource) {
+  if (typeof randomSource === 'function') return randomSource;
+  if (typeof randomSource?.randomInt === 'function') return randomSource.randomInt;
+  if (randomSource?.commitReveal) return createDeterministicRng(randomSource.commitReveal);
+  return crypto.randomInt;
+}
+
+function spinGrid(randomSource) {
+  const randomInt = resolveRandomInt(randomSource);
   return Array.from({ length: 4 }, () =>
-    Array.from({ length: 5 }, () => randomSymbol())
+    Array.from({ length: 5 }, () => randomSymbol(randomInt))
   );
 }
 

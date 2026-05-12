@@ -4,8 +4,8 @@ const { spinGrid, evaluateSpin } = require('../engine/slotEngine');
 const gameRegistry = Object.assign(Object.create(null), {
   slots: {
     id: 'slots',
-    play: ({ bet = 1, multiplier = 1 } = {}) => {
-      const grid = spinGrid();
+    play: ({ bet = 1, multiplier = 1, commitReveal } = {}) => {
+      const grid = commitReveal ? spinGrid({ commitReveal }) : spinGrid();
       return { grid, outcome: evaluateSpin(grid, bet, multiplier) };
     }
   },

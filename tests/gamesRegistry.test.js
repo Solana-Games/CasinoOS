@@ -15,3 +15,16 @@ test('dice and roulette ranges are valid', () => {
 
   assert.equal(Object.getPrototypeOf(gameRegistry), null);
 });
+
+test('slots game supports deterministic commit-reveal spin grids', () => {
+  const slots = getGame('slots');
+  const commitReveal = {
+    serverSeed: 'registry-server-seed',
+    clientSeed: 'registry-client-seed',
+    nonce: 4
+  };
+
+  const first = slots.play({ commitReveal });
+  const second = slots.play({ commitReveal });
+  assert.deepEqual(first.grid, second.grid);
+});

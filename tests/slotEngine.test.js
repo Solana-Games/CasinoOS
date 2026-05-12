@@ -10,6 +10,18 @@ test('spinGrid returns 5x4 grid', () => {
   }
 });
 
+test('spinGrid supports deterministic commit-reveal mode', () => {
+  const commitReveal = {
+    serverSeed: 'server-seed-deterministic',
+    clientSeed: 'client-seed-deterministic',
+    nonce: 12
+  };
+
+  const gridA = spinGrid({ commitReveal });
+  const gridB = spinGrid({ commitReveal });
+  assert.deepEqual(gridA, gridB);
+});
+
 test('evaluateSpin triggers free spins at 3+ scatter', () => {
   const grid = [
     ['SCATTER', 'SCATTER', 'SCATTER', 'ACE', 'KING'],

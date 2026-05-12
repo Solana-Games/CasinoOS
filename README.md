@@ -5,6 +5,7 @@ Production-focused scaffold for a modular, blockchain-native casino platform.
 ## Included modules
 
 - **Slot engine**: `src/engine/slotEngine.js` (5x4 reels, free-spins trigger, jackpot threshold)
+- **Provably fair RNG utility**: `src/engine/commitRevealRng.js` (server-seed commit + deterministic reveal stream)
 - **AI RTP controller**: `src/ai/rtpEngine.js` (adaptive 90–98 RTP)
 - **Multiplayer rooms**: `src/rooms/liveRooms.js` (room create/join/spin + jackpot pool)
 - **Game plugin registry**: `src/games/registry.js` (slots, dice, roulette, crash, blackjack + dynamic register)
@@ -28,6 +29,26 @@ Optional admin token lifetime can be configured via `ADMIN_TOKEN_TTL_MS`.
 npm ci
 npm test
 npm run build
+```
+
+## Commit-reveal RNG integration
+
+`spinGrid` supports deterministic commit-reveal inputs for verifiable rounds:
+
+```js
+const { createCommit } = require('./src/engine/commitRevealRng');
+const { spinGrid } = require('./src/engine/slotEngine');
+
+const serverSeed = 'secure-server-seed';
+const commitHash = createCommit(serverSeed); // publish commitHash pre-round
+
+const grid = spinGrid({
+  commitReveal: {
+    serverSeed,       // reveal post-round
+    clientSeed: 'player-seed',
+    nonce: 1
+  }
+});
 ```
 
 Open UI mock:
