@@ -1,6 +1,7 @@
+const crypto = require('node:crypto');
 const { spinGrid, evaluateSpin } = require('../engine/slotEngine');
 
-const gameRegistry = {
+const gameRegistry = Object.assign(Object.create(null), {
   slots: {
     id: 'slots',
     play: ({ bet = 1, multiplier = 1 } = {}) => {
@@ -10,23 +11,26 @@ const gameRegistry = {
   },
   dice: {
     id: 'dice',
-    play: () => ({ roll: Math.floor(Math.random() * 6) + 1 })
+    play: () => ({ roll: crypto.randomInt(1, 7) })
   },
   roulette: {
     id: 'roulette',
-    play: () => ({ number: Math.floor(Math.random() * 37) })
+    play: () => ({ number: crypto.randomInt(0, 37) })
   },
   crash: {
     id: 'crash',
-    play: () => ({ crashPoint: Number((1 + Math.random() * 10).toFixed(2)) })
+    play: () => ({ crashPoint: Number((1 + crypto.randomInt(0, 1001) / 100).toFixed(2)) })
   },
   blackjack: {
     id: 'blackjack',
-    play: () => ({ dealer: Math.floor(Math.random() * 11) + 16 })
+    play: () => ({ dealer: crypto.randomInt(16, 27) })
   }
-};
+});
 
 function registerGame(name, module) {
+  if (!/^[a-z0-9-]{2,32}$/i.test(String(name))) {
+    throw new TypeError('game name must be 2-32 chars [a-z0-9-]');
+  }
   gameRegistry[name] = module;
 }
 

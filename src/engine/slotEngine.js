@@ -1,3 +1,5 @@
+const crypto = require('node:crypto');
+
 const SYMBOLS = ['ACE', 'KING', 'QUEEN', 'JACK', 'SCATTER', 'WILD'];
 const PAYOUTS = {
   ACE: 20,
@@ -9,7 +11,7 @@ const PAYOUTS = {
 };
 
 function randomSymbol() {
-  return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+  return SYMBOLS[crypto.randomInt(0, SYMBOLS.length)];
 }
 
 function spinGrid() {
@@ -23,11 +25,17 @@ function countSymbol(grid, symbol) {
 }
 
 function evaluateSpin(grid, bet = 1, multiplier = 1, jackpotThreshold = 100) {
+  if (!Array.isArray(grid) || grid.length !== 4 || grid.some((row) => !Array.isArray(row) || row.length !== 5)) {
+    throw new TypeError('grid must be a 4x5 matrix');
+  }
+
   const flat = grid.flat();
   const symbolCounts = Object.fromEntries(SYMBOLS.map((symbol) => [symbol, 0]));
 
   for (const symbol of flat) {
-    symbolCounts[symbol] += 1;
+    if (Object.hasOwn(symbolCounts, symbol)) {
+      symbolCounts[symbol] += 1;
+    }
   }
 
   let baseWin = 0;

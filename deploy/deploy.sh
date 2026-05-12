@@ -10,8 +10,9 @@ else
 fi
 
 if command -v anchor >/dev/null 2>&1; then
+  SOLANA_CLUSTER="${SOLANA_NETWORK:-devnet}"
   anchor build
-  anchor deploy --provider.cluster devnet
+  anchor deploy --provider.cluster "$SOLANA_CLUSTER"
 else
   echo "⚠️ anchor CLI not installed, skipping Solana deployment"
 fi

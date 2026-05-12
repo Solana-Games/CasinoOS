@@ -1,7 +1,9 @@
 let rtp = 96;
 
 function clampRtp(value) {
-  return Math.max(90, Math.min(98, Number(value.toFixed(2))));
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return rtp;
+  return Math.max(90, Math.min(98, Number(numeric.toFixed(2))));
 }
 
 function adjustRTP(metrics = {}) {

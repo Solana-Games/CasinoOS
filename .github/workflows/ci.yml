@@ -45,15 +45,23 @@ jobs:
           node-version: 20
 
       - name: Deploy to Vercel (optional)
-        if: secrets.VERCEL_TOKEN != ''
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
         run: npx vercel --prod --token "${{ secrets.VERCEL_TOKEN }}"
 
       - name: Deploy Solana Program (optional)
-        if: secrets.ANCHOR_WALLET != ''
+        if: ${{ secrets.ANCHOR_WALLET != '' }}
+        env:
+          SOLANA_NETWORK: ${{ vars.SOLANA_NETWORK }}
         run: |
+          WALLET_PATH="$RUNNER_TEMP/anchor-wallet.json"
+          printf '%s' '${{ secrets.ANCHOR_WALLET }}' > "$WALLET_PATH"
+          chmod 600 "$WALLET_PATH"
+          export ANCHOR_WALLET="$WALLET_PATH"
+          CLUSTER="${SOLANA_NETWORK:-devnet}"
+
           if command -v anchor >/dev/null 2>&1; then
             anchor build
-            anchor deploy --provider.cluster devnet
+            anchor deploy --provider.cluster "$CLUSTER"
           else
             echo "Anchor CLI not available on runner; skipping."
           fi

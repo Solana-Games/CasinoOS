@@ -12,4 +12,6 @@ test('admin login and token verify', () => {
 
 test('invalid token returns null', () => {
   assert.equal(verify('not-a-token'), null);
+  assert.equal(verify('a.b'), null);
+  assert.equal(verify('e30.short'), null);
 });

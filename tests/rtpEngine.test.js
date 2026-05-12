@@ -12,3 +12,13 @@ test('rtp adjusts based on profit and retention', () => {
   assert.ok(getRTP() <= 98);
   setRTP(96);
 });
+
+test('setRTP handles string and invalid input safely', () => {
+  setRTP('97.25');
+  assert.equal(getRTP(), 97.25);
+
+  const current = getRTP();
+  setRTP('not-a-number');
+  assert.equal(getRTP(), current);
+  setRTP(96);
+});

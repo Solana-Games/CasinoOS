@@ -22,3 +22,20 @@ test('evaluateSpin triggers free spins at 3+ scatter', () => {
   assert.equal(result.freeSpinsTriggered, true);
   assert.ok(result.totalWin > 0);
 });
+
+test('evaluateSpin ignores unknown symbols', () => {
+  const grid = [
+    ['ACE', 'KING', 'UNKNOWN', 'JACK', 'QUEEN'],
+    ['SCATTER', 'SCATTER', 'SCATTER', 'ACE', 'KING'],
+    ['JACK', 'QUEEN', 'WILD', 'ACE', 'KING'],
+    ['JACK', 'QUEEN', 'WILD', 'ACE', 'KING']
+  ];
+
+  const result = evaluateSpin(grid, 1, 1, 999);
+  assert.equal(Number.isFinite(result.totalWin), true);
+  assert.equal(result.symbolCounts.UNKNOWN, undefined);
+});
+
+test('evaluateSpin rejects non-5x4 grid', () => {
+  assert.throws(() => evaluateSpin([['ACE']]), /4x5/);
+});
