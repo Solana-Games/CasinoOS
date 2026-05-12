@@ -13,6 +13,7 @@ Production-focused scaffold for a modular, blockchain-native casino platform.
 - **Casino UI mock screen**: `src/admin/index.html` (dark luxury 5x4 interface)
 - **CI/CD**: `.github/workflows/ci.yml`
 - **Build/bootstrap/deploy scripts**: `scripts/*`, `deploy/deploy.sh`
+- **Anchor on-chain escrow program**: `programs/casinoos_escrow/*` + `Anchor.toml`
 
 ## Default admin credentials
 
@@ -63,6 +64,46 @@ const pending = prepareSyncedRound('room-1', 'client-seed-shared');
 
 const result = resolveSyncedRound('room-1', pending.roundId, { p1: 2, p2: 3 }, 1);
 // result includes shared grid, commit hash, reveal seeds, per-player outcomes, and jackpot payout info
+```
+
+## Solana Anchor escrow + commit-reveal settlement
+
+New Anchor program scaffold (`programs/casinoos_escrow/src/lib.rs`) provides:
+
+- Escrowed room-round betting
+- Commit-reveal validation on settlement
+- NFT multiplier field on bets (`nft_multiplier_bps`, validated bounds)
+- Jackpot vault accumulation and payout trigger path
+- Treasury fee/remainder sweep
+
+### Integration bridge with existing JS modules
+
+Use `src/solana/anchorRoundBridge.js` to map room events into Anchor instruction payloads:
+
+```js
+const {
+  buildCreateRoundInstructionData,
+  fromResolvedSyncedRound
+} = require('./src/solana/anchorRoundBridge');
+
+// from server-side pending round context
+const createIxData = buildCreateRoundInstructionData({
+  roundId: 42,
+  serverSeed: 'secure-server-seed',
+  minBetLamports: 1_000_000,
+  closeSlot: 25_000
+});
+
+// from liveRooms resolved synced round event
+const settleIxData = fromResolvedSyncedRound(resolvedRoundEvent);
+```
+
+### Optional local Anchor build
+
+If Anchor CLI is installed:
+
+```bash
+npm run solana:anchor:build
 ```
 
 Open UI mock:

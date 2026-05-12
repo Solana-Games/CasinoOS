@@ -8,6 +8,8 @@
     "build": "node scripts/build.js",
     "test": "node --test",
     "test:engine": "node scripts/test-engine.js",
-    "bootstrap": "bash scripts/bootstrap.sh"
+    "bootstrap": "bash scripts/bootstrap.sh",
+    "solana:anchor:build": "anchor build",
+    "test:solana-bridge": "node --test tests/anchorRoundBridge.test.js"
   }
 }

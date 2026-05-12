@@ -1,0 +1,13 @@
+[features]
+seeds = true
+skip-lint = false
+
+[programs.localnet]
+casinoos_escrow = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkgP9G6fN4jJ"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+build = "anchor build"

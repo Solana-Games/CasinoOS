@@ -29,6 +29,14 @@ jobs:
       - name: Build web/backend scaffold
         run: npm run build
 
+      - name: Build Anchor program (optional)
+        run: |
+          if [ -f Anchor.toml ] && command -v anchor >/dev/null 2>&1; then
+            anchor build
+          else
+            echo "Anchor.toml or Anchor CLI unavailable; skipping anchor build."
+          fi
+
   deploy:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
