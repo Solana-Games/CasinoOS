@@ -8,6 +8,8 @@ const parsedRoomTtl = Number(process.env.ROOM_TTL_MS || 30 * 60 * 1000);
 const MAX_ROOMS = Number.isFinite(parsedMaxRooms) && parsedMaxRooms > 0 ? parsedMaxRooms : 1000;
 const ROOM_TTL_MS = Number.isFinite(parsedRoomTtl) && parsedRoomTtl > 0 ? parsedRoomTtl : 30 * 60 * 1000;
 const JACKPOT_THRESHOLD_MULTIPLIER = 50;
+const JACKPOT_CONTRIBUTION_RATE = 0.01;
+const ROOM_HISTORY_LIMIT = 50;
 
 function cleanupRooms() {
   const now = Date.now();
@@ -54,7 +56,7 @@ function spinRoom(id, playerId, bet = 1, multiplier = 1) {
     room.players.push(playerId);
   }
 
-  room.jackpotPool += bet * 0.01;
+  room.jackpotPool += bet * JACKPOT_CONTRIBUTION_RATE;
   const grid = spinGrid();
   const outcome = evaluateSpin(grid, bet, multiplier, room.jackpotPool * JACKPOT_THRESHOLD_MULTIPLIER);
 
@@ -67,7 +69,7 @@ function spinRoom(id, playerId, bet = 1, multiplier = 1) {
   };
 
   room.history.push(event);
-  if (room.history.length > 50) {
+  if (room.history.length > ROOM_HISTORY_LIMIT) {
     room.history.shift();
   }
   room.updatedAt = Date.now();
@@ -124,7 +126,7 @@ function resolveSyncedRound(id, roundId, playerBets = {}, multiplier = 1) {
 
   let totalContribution = 0;
   const playerOutcomes = participantEntries.map(([playerId, bet]) => {
-    totalContribution += bet * 0.01;
+    totalContribution += bet * JACKPOT_CONTRIBUTION_RATE;
     const outcome = evaluateSpin(grid, bet, multiplier, Number.POSITIVE_INFINITY);
     return {
       playerId,
@@ -161,7 +163,7 @@ function resolveSyncedRound(id, roundId, playerBets = {}, multiplier = 1) {
 
   delete room.pendingRounds[roundId];
   room.history.push(event);
-  if (room.history.length > 50) {
+  if (room.history.length > ROOM_HISTORY_LIMIT) {
     room.history.shift();
   }
   room.updatedAt = Date.now();
