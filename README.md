@@ -40,7 +40,7 @@ const { createCommit } = require('./src/engine/commitRevealRng');
 const { spinGrid } = require('./src/engine/slotEngine');
 
 const serverSeed = 'secure-server-seed';
-const commitHash = createCommit(serverSeed); // publish commitHash pre-round
+const commitHash = createCommit(serverSeed); // publish commit hash pre-round
 
 const grid = spinGrid({
   commitReveal: {
