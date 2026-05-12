@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scatter Solana Casino OS</title>
+    <style>
+      :root {
+        --bg: #090710;
+        --purple: #8b5cf6;
+        --teal: #2dd4bf;
+        --gold: #facc15;
+        --panel: rgba(255, 255, 255, 0.08);
+      }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, sans-serif;
+        background: radial-gradient(circle at top, #1c1240, var(--bg) 55%);
+        color: #f8fafc;
+      }
+      .wrap {
+        max-width: 1000px;
+        margin: 32px auto;
+        padding: 20px;
+      }
+      .title {
+        color: var(--gold);
+        text-shadow: 0 0 22px rgba(250, 204, 21, 0.6);
+      }
+      .slot {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        border: 1px solid rgba(139, 92, 246, 0.6);
+        border-radius: 16px;
+        padding: 16px;
+        background: var(--panel);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 0 28px rgba(45, 212, 191, 0.2);
+      }
+      .cell {
+        aspect-ratio: 1;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(45, 212, 191, 0.4);
+      }
+      .controls {
+        margin-top: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 12px;
+        background: var(--panel);
+      }
+      .spin {
+        background: linear-gradient(145deg, #facc15, #f59e0b);
+        border: none;
+        border-radius: 999px;
+        padding: 12px 28px;
+        font-weight: 700;
+      }
+      .admin {
+        margin-top: 18px;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(139, 92, 246, 0.5);
+        background: rgba(139, 92, 246, 0.08);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1 class="title">🎰 Scatter Solana Casino OS</h1>
+      <p>Balance: <strong>12.45 SOL</strong> · VIP: <strong>Gold x5</strong></p>
+
+      <section class="slot" aria-label="5x4 slot grid">
+        <div class="cell">ACE</div><div class="cell">KING</div><div class="cell">WILD</div><div class="cell">JACK</div><div class="cell">QUEEN</div>
+        <div class="cell">SCATTER</div><div class="cell">ACE</div><div class="cell">WILD</div><div class="cell">KING</div><div class="cell">JACK</div>
+        <div class="cell">QUEEN</div><div class="cell">SCATTER</div><div class="cell">ACE</div><div class="cell">KING</div><div class="cell">WILD</div>
+        <div class="cell">JACK</div><div class="cell">QUEEN</div><div class="cell">SCATTER</div><div class="cell">ACE</div><div class="cell">KING</div>
+      </section>
+
+      <section class="controls">
+        <span>Bet: 0.5 SOL</span>
+        <span>Turbo: Off · Auto: Off · Multiplier: x5</span>
+        <button class="spin">SPIN</button>
+      </section>
+
+      <section class="admin">
+        <strong>Admin Control Plane</strong>
+        <div>Default login: admin@admin.com / admin123</div>
+        <div>Capabilities: RTP override · Room management · Game registry</div>
+      </section>
+    </main>
+  </body>
+</html>

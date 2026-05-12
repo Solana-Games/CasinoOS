@@ -1,0 +1,13 @@
+{
+  "name": "casino-os",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scatter Solana casino operating system core scaffold",
+  "type": "commonjs",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node --test",
+    "test:engine": "node scripts/test-engine.js",
+    "bootstrap": "bash scripts/bootstrap.sh"
+  }
+}

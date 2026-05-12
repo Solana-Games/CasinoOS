@@ -1,0 +1,51 @@
+name: Scatter Casino CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run slot engine tests
+        run: npm test
+
+      - name: Build web/backend scaffold
+        run: npm run build
+
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build-test
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Deploy to Vercel (optional)
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        run: npx vercel --prod --token "${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy Solana Program (optional)
+        if: ${{ secrets.ANCHOR_WALLET != '' }}
+        run: |
+          anchor build
+          anchor deploy --provider.cluster devnet
