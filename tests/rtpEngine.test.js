@@ -10,4 +10,5 @@ test('rtp adjusts based on profit and retention', () => {
   const afterRetentionDrop = adjustRTP({ profitDelta: 0, retentionDelta: -5, volatilityDelta: 0 });
   assert.ok(afterRetentionDrop > afterProfit);
   assert.ok(getRTP() <= 98);
+  setRTP(96);
 });
