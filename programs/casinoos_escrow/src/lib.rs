@@ -151,8 +151,7 @@ pub mod casinoos_escrow {
             let target = ctx
                 .remaining_accounts
                 .get(idx)
-                .ok_or(CasinoError::PayoutAccountsMismatch)?
-                .clone();
+                .ok_or(CasinoError::PayoutAccountsMismatch)?;
             require!(target.key() == payout.player, CasinoError::PayoutAccountsMismatch);
 
             let payout_lamports = escrow_balance
