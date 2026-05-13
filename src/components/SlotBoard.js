@@ -32,7 +32,6 @@ export default function SlotBoard() {
     const body = {
       betSol: bet,
       commitReveal: {
-        serverSeed: 'server-seed-demo',
         clientSeed: crypto.randomUUID(),
         nonce: Math.floor(Date.now() / 1000),
       },

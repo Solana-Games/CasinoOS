@@ -1,5 +1,16 @@
+import { headers } from 'next/headers';
+
+async function resolveBaseUrl() {
+  const configured = process.env.NEXT_SERVER_URL || process.env.NEXT_PUBLIC_BASE_URL;
+  if (configured) return configured;
+  const incoming = await headers();
+  const host = incoming.get('x-forwarded-host') || incoming.get('host');
+  const proto = incoming.get('x-forwarded-proto') || 'http';
+  return host ? `${proto}://${host}` : 'http://localhost:3000';
+}
+
 async function getHistory() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/history`, { cache: 'no-store' });
+  const response = await fetch(`${await resolveBaseUrl()}/api/history`, { cache: 'no-store' });
   if (!response.ok) return [];
   return response.json();
 }

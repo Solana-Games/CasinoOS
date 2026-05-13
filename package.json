@@ -2,7 +2,7 @@
   "name": "casinoos",
   "version": "1.0.0",
   "private": true,
-  "description": "Scatter Solana Casino OS - Next.js 14 + Solana + Anchor + realtime casino stack",
+  "description": "Scatter Solana Casino OS - Next.js 15 + Solana + Anchor + realtime casino stack",
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/build.js",

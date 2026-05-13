@@ -37,7 +37,7 @@ function updateHouseFeeBps(feeBps) {
 }
 
 function setJackpotTier(name, value) {
-  if (!controlState.jackpotRates[name]) throw new Error('Unknown jackpot tier');
+  if (!(name in controlState.jackpotRates)) throw new Error('Unknown jackpot tier');
   if (value <= 0) throw new Error('Invalid jackpot amount');
   controlState.jackpotRates[name] = value;
   return controlState;

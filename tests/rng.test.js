@@ -12,3 +12,9 @@ test('reveal output is bounded 0..1', () => {
   assert.ok(out.value >= 0 && out.value <= 1);
   assert.equal(typeof out.hash, 'string');
 });
+
+test('reveal output spans both sides of 0.5', () => {
+  const values = Array.from({ length: 64 }, (_, cursor) => reveal('server', 'client', 1, cursor, 'p').value);
+  assert.ok(values.some((value) => value < 0.5));
+  assert.ok(values.some((value) => value > 0.5));
+});

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { updateRtpOverride, evaluateRtp, updateHouseFeeBps } = require('../src/server/control');
+const { updateRtpOverride, evaluateRtp, updateHouseFeeBps, setJackpotTier } = require('../src/server/control');
 
 test('rtp override applies', () => {
   updateRtpOverride(94.5);
@@ -12,4 +12,9 @@ test('rtp override applies', () => {
 test('house fee update validates range', () => {
   updateHouseFeeBps(300);
   assert.throws(() => updateHouseFeeBps(1200));
+});
+
+test('jackpot tier update validates tier key', () => {
+  setJackpotTier('mini', 15);
+  assert.throws(() => setJackpotTier('unknown', 10));
 });

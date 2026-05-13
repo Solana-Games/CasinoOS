@@ -4,7 +4,7 @@ Production-oriented full-stack Solana casino platform with a premium **Scatter S
 
 ## Highlights
 
-- **Next.js 14 App Router frontend** (`src/app`) with dark luxury neon styling
+- **Next.js 15 App Router frontend** (`src/app`) with dark luxury neon styling
 - **Anchor escrow program** (`programs/casinoos_escrow`) for SOL custody + settlement
 - **Provably fair commit-reveal RNG** (engine + bridge + tests)
 - **Adaptive RTP AI engine** bounded to **90%-98%**
@@ -63,7 +63,7 @@ tests/*.test.js
 
 ## Core Architecture
 
-### 1) Frontend (Next.js 14)
+### 1) Frontend (Next.js 15)
 
 - Main game UI lives in `src/components/SlotBoard.js` rendered by `src/app/page.js`
 - Design language: dark neon purple + gold + teal

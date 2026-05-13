@@ -1,8 +1,17 @@
 const crypto = require('node:crypto');
 const anchor = require('@coral-xyz/anchor');
-const { createCommit } = require('../engine/commitRevealRng');
 
-function hashSeed(seed) {
+function hashSeed(seedBuffer) {
+  return crypto.createHash('sha256').update(seedBuffer).digest();
+}
+
+function hashHex(seedBuffer) {
+  return hashSeed(seedBuffer).toString('hex');
+}
+
+function normalizeSeed(seed) {
+  if (Buffer.isBuffer(seed) && seed.length === 32) return seed;
+  if (typeof seed !== 'string' || !seed.length) throw new Error('seed must be a non-empty string');
   return crypto.createHash('sha256').update(seed).digest();
 }
 
@@ -13,15 +22,38 @@ function to32ByteArray(buffer) {
   return [...out];
 }
 
+function nonceToLeBytes(nonce) {
+  const out = Buffer.alloc(8);
+  out.writeBigUInt64LE(BigInt(nonce));
+  return out;
+}
+
+function parsePlayerPubkeyBytes(playerPubkey) {
+  try {
+    return new anchor.web3.PublicKey(playerPubkey).toBuffer();
+  } catch {
+    return anchor.web3.PublicKey.default.toBuffer();
+  }
+}
+
 function createRoundPayload({ serverSeed, clientSeed, nonce, playerId }) {
-  const commitHash = createCommit(serverSeed, clientSeed, nonce, playerId);
+  const serverSeedBytesBuffer = normalizeSeed(serverSeed);
+  const clientSeedBytesBuffer = normalizeSeed(clientSeed);
+  const nonceLeBytes = nonceToLeBytes(nonce);
+  const playerPubkeyBytes = parsePlayerPubkeyBytes(playerId);
+  const clientSeedHash = hashHex(clientSeedBytesBuffer);
+  const commitHash = hashHex(
+    Buffer.concat([serverSeedBytesBuffer, clientSeedBytesBuffer, nonceLeBytes, playerPubkeyBytes])
+  );
+
   return {
     nonce,
     commitHashHex: commitHash,
     commitHashBytes: to32ByteArray(Buffer.from(commitHash, 'hex')),
-    clientSeedHashBytes: to32ByteArray(hashSeed(clientSeed)),
-    clientSeedBytes: to32ByteArray(Buffer.from(clientSeed.padEnd(32, '0').slice(0, 32))),
-    serverSeedBytes: to32ByteArray(Buffer.from(serverSeed.padEnd(32, '0').slice(0, 32))),
+    clientSeedHashHex: clientSeedHash,
+    clientSeedHashBytes: to32ByteArray(Buffer.from(clientSeedHash, 'hex')),
+    clientSeedBytes: to32ByteArray(clientSeedBytesBuffer),
+    serverSeedBytes: to32ByteArray(serverSeedBytesBuffer),
   };
 }
 

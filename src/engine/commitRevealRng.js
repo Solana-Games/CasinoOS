@@ -12,7 +12,7 @@ function createCommit(serverSeed, clientSeed, nonce, playerId = '') {
 function reveal(serverSeed, clientSeed, nonce, cursor = 0, playerId = '') {
   const commit = createCommit(serverSeed, clientSeed, nonce, playerId);
   const stream = sha256(`${commit}:${cursor}`);
-  const value = parseInt(stream.slice(0, 13), 16) / 0x1fffffffffffff;
+  const value = parseInt(stream.slice(0, 13), 16) / 0x10000000000000;
   return {
     commit,
     value,
