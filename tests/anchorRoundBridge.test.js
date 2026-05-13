@@ -56,6 +56,17 @@ test('prepare bridge supports preparedRound.serverSeed naming', () => {
   assert.equal(payload.commitHash.length, 32);
 });
 
+test('prepare bridge requires closeSlot to avoid immediate on-chain close', () => {
+  assert.throws(
+    () =>
+      fromPreparedSyncedRound({
+        roundId: 11,
+        serverSeed: 'seed-11'
+      }),
+    /closeSlot must be provided/
+  );
+});
+
 test('settle payload enforces payout bps bounds', () => {
   assert.throws(
     () =>
@@ -103,4 +114,19 @@ test('resolved synced round supports zero-winner payload', () => {
 
   assert.equal(settle.payouts.length, 0);
   assert.equal(settle.jackpotWinner, null);
+});
+
+test('resolved synced round allocates at least 1 bps to each winner', () => {
+  const settle = fromResolvedSyncedRound({
+    roundId: 6,
+    reveal: { serverSeed: 'tiny-winner-seed' },
+    playerOutcomes: [
+      { playerId: 'p1', totalWin: 0.0001 },
+      { playerId: 'p2', totalWin: 9999.9999 }
+    ]
+  });
+
+  assert.equal(settle.payouts.length, 2);
+  assert.ok(settle.payouts.every((item) => item.bps >= 1));
+  assert.equal(settle.payouts.reduce((sum, item) => sum + item.bps, 0), 10_000);
 });

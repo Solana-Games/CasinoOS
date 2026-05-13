@@ -8,9 +8,16 @@ function assertNonEmptyString(value, fieldName) {
   }
 }
 
-function createCommit(serverSeed) {
+function normalizeServerSeedBytes(serverSeed) {
   assertNonEmptyString(serverSeed, 'serverSeed');
-  return crypto.createHash('sha256').update(serverSeed).digest('hex');
+  if (/^[a-f0-9]{64}$/i.test(serverSeed)) {
+    return Buffer.from(serverSeed, 'hex');
+  }
+  return crypto.createHash('sha256').update(serverSeed).digest();
+}
+
+function createCommit(serverSeed) {
+  return crypto.createHash('sha256').update(normalizeServerSeedBytes(serverSeed)).digest('hex');
 }
 
 function verifyCommit(serverSeed, commitHash) {

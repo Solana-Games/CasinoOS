@@ -37,6 +37,15 @@ function evaluateSpin(grid, bet = 1, multiplier = 1, jackpotThreshold = 100) {
   if (!Array.isArray(grid) || grid.length !== 4 || grid.some((row) => !Array.isArray(row) || row.length !== 5)) {
     throw new TypeError('grid must be a 4x5 matrix');
   }
+  if (!Number.isFinite(bet) || bet <= 0) {
+    throw new TypeError('bet must be a finite positive number');
+  }
+  if (!Number.isFinite(multiplier) || multiplier <= 0) {
+    throw new TypeError('multiplier must be a finite positive number');
+  }
+  if (typeof jackpotThreshold !== 'number' || Number.isNaN(jackpotThreshold) || jackpotThreshold <= 0) {
+    throw new TypeError('jackpotThreshold must be a positive number');
+  }
 
   const flat = grid.flat();
   const symbolCounts = Object.fromEntries(SYMBOLS.map((symbol) => [symbol, 0]));

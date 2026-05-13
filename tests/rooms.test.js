@@ -15,6 +15,12 @@ test('room lifecycle create/join/spin works', () => {
   assert.ok(room.jackpotPool > 0);
 });
 
+test('spinRoom rejects invalid bets and multipliers', () => {
+  createRoom('alpha-invalid');
+  assert.throws(() => spinRoom('alpha-invalid', 'p1', 0, 1), /bet must be a finite positive number/);
+  assert.throws(() => spinRoom('alpha-invalid', 'p1', 1, Infinity), /multiplier must be a finite positive number/);
+});
+
 test('synced rounds use commit-reveal and shared outcomes', () => {
   createRoom('sync-alpha');
   const prepared = prepareSyncedRound('sync-alpha', 'client-seed-1', 'round-1');

@@ -29,6 +29,9 @@ jobs:
       - name: Build web/backend scaffold
         run: npm run build
 
+      - name: Check Anchor Rust workspace
+        run: cargo check --workspace
+
       - name: Build Anchor program (optional)
         run: |
           if [ -f Anchor.toml ] && command -v anchor >/dev/null 2>&1; then

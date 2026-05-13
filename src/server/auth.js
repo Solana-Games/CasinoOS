@@ -2,12 +2,11 @@ const crypto = require('node:crypto');
 
 const DEFAULT_ADMIN_EMAIL = 'admin@admin.com';
 const DEFAULT_ADMIN_PASSWORD = 'admin123';
-const DEFAULT_SECRET = 'scatter-secret';
 const DEFAULT_TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
-const SECRET = process.env.ADMIN_SECRET || DEFAULT_SECRET;
+const SECRET = process.env.ADMIN_SECRET || crypto.randomBytes(32).toString('hex');
 const TOKEN_TTL_MS = Number(process.env.ADMIN_TOKEN_TTL_MS || DEFAULT_TOKEN_TTL_MS);
 
 function enforceSecureProductionConfig() {
@@ -16,7 +15,7 @@ function enforceSecureProductionConfig() {
   if (
     ADMIN_EMAIL === DEFAULT_ADMIN_EMAIL ||
     ADMIN_PASSWORD === DEFAULT_ADMIN_PASSWORD ||
-    SECRET === DEFAULT_SECRET
+    !process.env.ADMIN_SECRET
   ) {
     throw new Error(
       'Production requires ADMIN_EMAIL, ADMIN_PASSWORD, and ADMIN_SECRET to be set securely.'

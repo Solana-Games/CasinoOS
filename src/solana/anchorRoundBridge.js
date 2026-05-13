@@ -54,11 +54,16 @@ function fromPreparedSyncedRound(preparedRound, options = {}) {
     throw new TypeError('serverSeed is required via preparedRound.serverSeed or options.serverSeed');
   }
 
+  const closeSlot = options.closeSlot ?? preparedRound.closeSlot;
+  if (!Number.isInteger(Number(closeSlot)) || Number(closeSlot) <= 1) {
+    throw new TypeError('closeSlot must be provided as a future slot (> 1)');
+  }
+
   return buildCreateRoundInstructionData({
     roundId: preparedRound.roundId,
     serverSeed: options.serverSeed || preparedRound.serverSeed || preparedRound.reveal?.serverSeed,
     minBetLamports: options.minBetLamports || 1_000_000,
-    closeSlot: options.closeSlot || 1,
+    closeSlot,
     jackpotBps: options.jackpotBps ?? 100
   });
 }
@@ -90,7 +95,9 @@ function buildSettleRoundInstructionData({
     ? serverSeed
     : Array.isArray(serverSeed)
       ? Buffer.from(serverSeed)
-      : crypto.createHash('sha256').update(serverSeed).digest();
+      : /^[a-f0-9]{64}$/i.test(serverSeed)
+        ? Buffer.from(serverSeed, 'hex')
+        : crypto.createHash('sha256').update(serverSeed).digest();
 
   if (serverSeedBytes.length !== 32) {
     throw new TypeError('serverSeed must resolve to 32 bytes');
@@ -117,19 +124,37 @@ function fromResolvedSyncedRound(resolvedRound) {
 
   const payouts = totalWins === 0
     ? []
-    : eligible.map((item, index) => {
-      if (index === eligible.length - 1) {
-        const consumed = eligible
-          .slice(0, -1)
-          .reduce((sum, prior) => sum + Math.floor((Number(prior.totalWin) / totalWins) * 10_000), 0);
-        const remainder = 10_000 - consumed;
-        if (remainder < 0) {
-          throw new TypeError('winner payout remainder is negative');
-        }
-        return { player: item.playerId, bps: remainder };
+    : (() => {
+      if (eligible.length > 10_000) {
+        throw new TypeError('too many winners to allocate minimum 1 bps each');
       }
-      return { player: item.playerId, bps: Math.floor((Number(item.totalWin) / totalWins) * 10_000) };
-    });
+
+      const distributableBps = 10_000 - eligible.length;
+      const proportional = eligible.map((item, index) => {
+        const exact = (Number(item.totalWin) / totalWins) * distributableBps;
+        const base = Math.floor(exact);
+        return {
+          player: item.playerId,
+          bps: 1 + base,
+          remainder: exact - base,
+          index
+        };
+      });
+
+      let assigned = proportional.reduce((sum, item) => sum + item.bps, 0);
+      proportional
+        .sort((a, b) => (b.remainder - a.remainder) || (a.index - b.index))
+        .forEach((item) => {
+          if (assigned < 10_000) {
+            item.bps += 1;
+            assigned += 1;
+          }
+        });
+
+      return proportional
+        .sort((a, b) => a.index - b.index)
+        .map(({ player, bps }) => ({ player, bps }));
+    })();
 
   const jackpotWinner = eligible.length === 0
     ? null

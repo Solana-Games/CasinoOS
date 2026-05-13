@@ -51,6 +51,13 @@ function joinRoom(id, playerId) {
 }
 
 function spinRoom(id, playerId, bet = 1, multiplier = 1) {
+  if (!Number.isFinite(bet) || bet <= 0) {
+    throw new TypeError('bet must be a finite positive number');
+  }
+  if (!Number.isFinite(multiplier) || multiplier <= 0) {
+    throw new TypeError('multiplier must be a finite positive number');
+  }
+
   const room = createRoom(id);
   if (!room.players.includes(playerId)) {
     room.players.push(playerId);

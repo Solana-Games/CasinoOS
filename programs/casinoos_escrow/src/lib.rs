@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{keccak::hashv, system_instruction};
+use anchor_lang::solana_program::{hash::hashv, system_instruction};
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkgP9G6fN4jJ");
 
@@ -115,8 +115,8 @@ pub mod casinoos_escrow {
         Ok(())
     }
 
-    pub fn settle_round(
-        ctx: Context<SettleRound>,
+    pub fn settle_round<'info>(
+        ctx: Context<'_, '_, '_, 'info, SettleRound<'info>>,
         server_seed: [u8; 32],
         nonce: u64,
         jackpot_winner: Option<Pubkey>,
@@ -148,7 +148,11 @@ pub mod casinoos_escrow {
         let mut paid_total: u64 = 0;
 
         for (idx, payout) in payouts.iter().enumerate() {
-            let target = &ctx.remaining_accounts[idx];
+            let target = ctx
+                .remaining_accounts
+                .get(idx)
+                .ok_or(CasinoError::PayoutAccountsMismatch)?
+                .clone();
             require!(target.key() == payout.player, CasinoError::PayoutAccountsMismatch);
 
             let payout_lamports = escrow_balance
@@ -162,7 +166,7 @@ pub mod casinoos_escrow {
                     .ok_or(CasinoError::MathOverflow)?;
                 transfer_lamports(
                     &ctx.accounts.escrow.to_account_info(),
-                    target,
+                    &target,
                     payout_lamports,
                     &ctx.accounts.system_program.to_account_info(),
                     &[&[
@@ -223,14 +227,13 @@ pub mod casinoos_escrow {
             let jackpot_balance = **ctx.accounts.jackpot_vault.to_account_info().lamports.borrow();
             if jackpot_balance > 0 && jackpot_winner.is_some() {
                 let winner_key = jackpot_winner.ok_or(CasinoError::InvalidJackpotWinner)?;
-                let jackpot_winner_account = ctx
-                    .remaining_accounts
-                    .iter()
-                    .find(|account| account.key() == winner_key)
-                    .ok_or(CasinoError::InvalidJackpotWinner)?;
+                require!(
+                    ctx.accounts.jackpot_winner.key() == winner_key,
+                    CasinoError::InvalidJackpotWinner
+                );
                 transfer_lamports(
                     &ctx.accounts.jackpot_vault.to_account_info(),
-                    jackpot_winner_account,
+                    &ctx.accounts.jackpot_winner.to_account_info(),
                     jackpot_balance,
                     &ctx.accounts.system_program.to_account_info(),
                     &[&[
@@ -283,7 +286,8 @@ pub struct InitializeHouse<'info> {
         seeds = [b"jackpot", house.key().as_ref()],
         bump
     )]
-    pub jackpot_vault: SystemAccount<'info>,
+    /// CHECK: System-owned PDA jackpot vault account.
+    pub jackpot_vault: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -298,7 +302,7 @@ pub struct CreateRound<'info> {
         init,
         payer = authority,
         space = 8 + Round::LEN,
-        seeds = [b"round", &round_id.to_le_bytes()],
+        seeds = [b"round", round_id.to_le_bytes().as_ref()],
         bump
     )]
     pub round: Account<'info, Round>,
@@ -309,7 +313,8 @@ pub struct CreateRound<'info> {
         seeds = [b"escrow", round.key().as_ref()],
         bump
     )]
-    pub escrow: SystemAccount<'info>,
+    /// CHECK: System-owned PDA escrow account.
+    pub escrow: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -366,6 +371,9 @@ pub struct SettleRound<'info> {
     /// CHECK: Must match configured treasury in house account.
     #[account(mut, address = house.treasury)]
     pub treasury: UncheckedAccount<'info>,
+    /// CHECK: Jackpot winner account is validated against the jackpot_winner pubkey argument.
+    #[account(mut)]
+    pub jackpot_winner: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 

@@ -51,3 +51,9 @@ test('evaluateSpin ignores unknown symbols', () => {
 test('evaluateSpin rejects non-5x4 grid', () => {
   assert.throws(() => evaluateSpin([['ACE']]), /4x5/);
 });
+
+test('evaluateSpin rejects invalid bet or multiplier', () => {
+  const grid = spinGrid();
+  assert.throws(() => evaluateSpin(grid, 0, 1), /bet must be a finite positive number/);
+  assert.throws(() => evaluateSpin(grid, 1, -1), /multiplier must be a finite positive number/);
+});
