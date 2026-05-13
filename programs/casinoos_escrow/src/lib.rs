@@ -5,7 +5,7 @@ use anchor_lang::solana_program::{
     system_instruction,
 };
 
-declare_id!("Casin0s111111111111111111111111111111111111");
+declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkgP8P8Q9Pj8k");
 
 const BPS_DENOMINATOR: u64 = 10_000;
 const MAX_RTP_BPS: u16 = 9_800;
