@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CasinoOS Admin Control Plane</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Inter, Arial, sans-serif;
+        background: radial-gradient(circle at 40% 0%, #2e1065 0%, #090414 45%, #05020a 100%);
+        color: #f8fafc;
+      }
+      .wrap { max-width: 1200px; margin: 0 auto; padding: 28px; }
+      .title { font-size: 42px; font-weight: 900; letter-spacing: .12em; color: #fbbf24; }
+      .subtitle { color: #67e8f9; }
+      .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+      .card {
+        border: 1px solid rgba(251,191,36,.45);
+        border-radius: 16px;
+        background: linear-gradient(145deg, rgba(31,9,61,.92), rgba(5,2,12,.95));
+        box-shadow: 0 0 18px rgba(139,92,246,.6), inset 0 0 20px rgba(20,184,166,.2);
+        padding: 18px;
+      }
+      .label { font-size: 12px; text-transform: uppercase; color: #67e8f9; }
+      .value { font-size: 34px; font-weight: 800; margin-top: 8px; color: #fde68a; }
+      .controls { margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      input, select, button {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(251,191,36,.55);
+        background: rgba(2,6,23,.6);
+        color: #fff;
+        padding: 10px 12px;
+      }
+      button {
+        font-weight: 700;
+        cursor: pointer;
+        background: linear-gradient(145deg, #fbbf24, #a16207);
+        color: #1c1917;
+      }
+      table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+      th, td { border-top: 1px solid rgba(139,92,246,.35); padding: 10px; text-align: left; }
+      th { color: #fbbf24; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="title">CASINOOS ADMIN</div>
+      <div class="subtitle">RTP Override • Fees • Game Toggles • Users • Jackpots • Analytics</div>
+
+      <section class="grid">
+        <div class="card"><div class="label">Current RTP</div><div class="value">95.40%</div></div>
+        <div class="card"><div class="label">House Fee</div><div class="value">3.00%</div></div>
+        <div class="card"><div class="label">Active Users</div><div class="value">1,248</div></div>
+      </section>
+
+      <section class="controls">
+        <div class="card">
+          <h3>RTP Control</h3>
+          <label class="label">Override RTP (90-98)</label>
+          <input type="number" min="90" max="98" step="0.1" value="95" />
+          <button style="margin-top:10px;">Apply RTP Override</button>
+        </div>
+        <div class="card">
+          <h3>House Config</h3>
+          <label class="label">Fee bps</label>
+          <input type="number" value="300" />
+          <label class="label" style="margin-top:10px; display:block;">Game status</label>
+          <select><option>Scatter Solana: Enabled</option><option>Scatter Solana: Disabled</option></select>
+          <button style="margin-top:10px;">Save Config</button>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:16px;">
+        <h3>Jackpot Tiers</h3>
+        <table>
+          <thead><tr><th>Tier</th><th>Amount (SOL)</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Grand</td><td>1000</td><td>Live</td></tr>
+            <tr><td>Major</td><td>250</td><td>Live</td></tr>
+            <tr><td>Minor</td><td>50</td><td>Live</td></tr>
+            <tr><td>Mini</td><td>10</td><td>Live</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PLAYER
+  ADMIN
+}
+
+enum TxType {
+  DEPOSIT
+  BET
+  WIN
+  JACKPOT
+  WITHDRAWAL
+  FEE
+}
+
+model User {
+  id            String        @id @default(cuid())
+  wallet        String        @unique
+  username      String?
+  role          UserRole      @default(PLAYER)
+  balanceLamports BigInt      @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  bets          Bet[]
+  transactions  Transaction[]
+}
+
+model Room {
+  id              String      @id @default(cuid())
+  code            String      @unique
+  pooledJackpot   Decimal     @default(0) @db.Decimal(20, 6)
+  active          Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  bets            Bet[]
+}
+
+model Bet {
+  id              String      @id @default(cuid())
+  userId          String
+  roomId          String?
+  game            String
+  amountSol       Decimal     @db.Decimal(20, 6)
+  payoutSol       Decimal     @default(0) @db.Decimal(20, 6)
+  commitHash      String
+  serverSeedHash  String
+  clientSeedHash  String
+  nonce           BigInt
+  freeSpinsAwarded Int        @default(0)
+  jackpotContributionSol Decimal @default(0) @db.Decimal(20, 6)
+  createdAt       DateTime    @default(now())
+
+  user            User        @relation(fields: [userId], references: [id])
+  room            Room?       @relation(fields: [roomId], references: [id])
+}
+
+model JackpotTier {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  amountSol   Decimal  @default(0) @db.Decimal(20, 6)
+  updatedAt   DateTime @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  type        TxType
+  amountSol   Decimal  @db.Decimal(20, 6)
+  reference   String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+}

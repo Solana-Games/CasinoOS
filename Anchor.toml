@@ -1,0 +1,16 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+casinoos_escrow = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkgP8P8Q9Pj8k"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "npm test"
