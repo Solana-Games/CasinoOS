@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 
 const defaultGrid = [
   ['K', 'Q', 'A', 'J', 'K'],
-  ['🟪', '👑', 'A', '♠️', '🟪'],
+  ['🟪', '👑', 'A', '🟡', '🟪'],
   ['👑', '👑', '🟪', 'J', 'A'],
   ['K', 'Q', 'A', 'J', '🟡'],
 ];
@@ -23,12 +23,18 @@ export default function SlotBoard() {
   );
 
   async function spin() {
+    const authRes = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ wallet: 'demo-wallet', userId: 'demo-player' }),
+    });
+    const authData = await authRes.json();
     const body = {
       betSol: bet,
       commitReveal: {
         serverSeed: 'server-seed-demo',
         clientSeed: crypto.randomUUID(),
-        nonce: Date.now(),
+        nonce: Math.floor(Date.now() / 1000),
       },
       roomId: 'lobby',
       userId: 'demo-player',
@@ -36,7 +42,10 @@ export default function SlotBoard() {
 
     const response = await fetch('/api/spin', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${authData.token}`,
+      },
       body: JSON.stringify(body),
     });
 

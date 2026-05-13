@@ -65,7 +65,7 @@ function resolveSyncedRound({ roomId, roundId }) {
     return { playerId, ...spin };
   });
 
-  const jackpotTriggered = playerResults.some((r) => r.megaWin && r.scatters >= 3);
+  const jackpotTriggered = playerResults.some((r) => r.megaWin && Number(r.scatters ?? 0) >= 3);
   const jackpotPayout = jackpotTriggered ? Number((room.pooledJackpotSol * 0.3).toFixed(4)) : 0;
   if (jackpotPayout > 0) room.pooledJackpotSol = Number((room.pooledJackpotSol - jackpotPayout).toFixed(4));
 

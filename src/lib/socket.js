@@ -5,9 +5,13 @@ let io;
 
 function initSocket(server) {
   if (io) return io;
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
   io = new Server(server, {
     cors: {
-      origin: '*',
+      origin: allowedOrigins,
       methods: ['GET', 'POST'],
     },
   });

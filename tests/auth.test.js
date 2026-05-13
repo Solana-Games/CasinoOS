@@ -13,3 +13,9 @@ test('wallet nonce generation', () => {
   assert.equal(typeof nonce, 'string');
   assert.equal(nonce.length, 16);
 });
+
+test('wallet nonce generation is unique per call', () => {
+  const first = nonceForWallet('wallet1');
+  const second = nonceForWallet('wallet1');
+  assert.notEqual(first, second);
+});

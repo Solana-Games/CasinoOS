@@ -10,6 +10,7 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkgP8P8Q9Pj8k");
 const BPS_DENOMINATOR: u64 = 10_000;
 const MAX_RTP_BPS: u16 = 9_800;
 const MIN_RTP_BPS: u16 = 9_000;
+const MAX_PAYOUT_MULTIPLIER: u64 = 20;
 
 #[program]
 pub mod casinoos_escrow {
@@ -26,6 +27,12 @@ pub mod casinoos_escrow {
         require!(jackpot_bps <= 2_000, CasinoError::InvalidJackpotBps);
         require!(min_bet_lamports > 0, CasinoError::InvalidBetBounds);
         require!(max_bet_lamports > min_bet_lamports, CasinoError::InvalidBetBounds);
+        let (expected_treasury, treasury_bump) =
+            Pubkey::find_program_address(&[b"treasury", ctx.accounts.authority.key().as_ref()], &crate::ID);
+        let (expected_jackpot, jackpot_bump) =
+            Pubkey::find_program_address(&[b"jackpot", ctx.accounts.authority.key().as_ref()], &crate::ID);
+        require_keys_eq!(expected_treasury, ctx.accounts.treasury.key(), CasinoError::InvalidTreasuryVault);
+        require_keys_eq!(expected_jackpot, ctx.accounts.jackpot_vault.key(), CasinoError::InvalidJackpotVault);
 
         let house = &mut ctx.accounts.house;
         house.authority = ctx.accounts.authority.key();
@@ -37,6 +44,8 @@ pub mod casinoos_escrow {
         house.min_bet_lamports = min_bet_lamports;
         house.max_bet_lamports = max_bet_lamports;
         house.bump = ctx.bumps.house;
+        house.treasury_bump = treasury_bump;
+        house.jackpot_bump = jackpot_bump;
         house.paused = false;
         Ok(())
     }
@@ -162,7 +171,10 @@ pub mod casinoos_escrow {
             .checked_mul(MAX_RTP_BPS as u64)
             .ok_or(CasinoError::ArithmeticOverflow)?
             / BPS_DENOMINATOR;
-        require!(payout_lamports <= base_cap.saturating_mul(20), CasinoError::PayoutCapExceeded);
+        require!(
+            payout_lamports <= base_cap.saturating_mul(MAX_PAYOUT_MULTIPLIER),
+            CasinoError::PayoutCapExceeded
+        );
 
         let mut final_payout = payout_lamports;
         if nft_collection == ctx.accounts.nft_multiplier_registry.collection {
@@ -186,7 +198,7 @@ pub mod casinoos_escrow {
                     ctx.accounts.jackpot_vault.to_account_info(),
                     ctx.accounts.system_program.to_account_info(),
                 ],
-                &[&[b"house", house.authority.as_ref(), &[house.bump]]],
+                &[&[b"treasury", house.authority.as_ref(), &[house.treasury_bump]]],
             )?;
         }
 
@@ -205,7 +217,7 @@ pub mod casinoos_escrow {
                     ctx.accounts.player.to_account_info(),
                     ctx.accounts.system_program.to_account_info(),
                 ],
-                &[&[b"house", house.authority.as_ref(), &[house.bump]]],
+                &[&[b"treasury", house.authority.as_ref(), &[house.treasury_bump]]],
             )?;
         }
 
@@ -222,7 +234,7 @@ pub mod casinoos_escrow {
                     ctx.accounts.player.to_account_info(),
                     ctx.accounts.system_program.to_account_info(),
                 ],
-                &[&[b"jackpot", house.authority.as_ref(), &[ctx.accounts.house.bump]]],
+                &[&[b"jackpot", house.authority.as_ref(), &[house.jackpot_bump]]],
             )?;
         }
 
@@ -346,10 +358,12 @@ pub struct House {
     pub max_bet_lamports: u64,
     pub paused: bool,
     pub bump: u8,
+    pub treasury_bump: u8,
+    pub jackpot_bump: u8,
 }
 
 impl House {
-    pub const SIZE: usize = 32 + 32 + 32 + 32 + 2 + 2 + 8 + 8 + 1 + 1;
+    pub const SIZE: usize = 32 + 32 + 32 + 32 + 2 + 2 + 8 + 8 + 1 + 1 + 1 + 1;
 }
 
 #[account]
@@ -428,4 +442,8 @@ pub enum CasinoError {
     InvalidNftMultiplier,
     #[msg("arithmetic overflow")]
     ArithmeticOverflow,
+    #[msg("invalid treasury vault")]
+    InvalidTreasuryVault,
+    #[msg("invalid jackpot vault")]
+    InvalidJackpotVault,
 }
