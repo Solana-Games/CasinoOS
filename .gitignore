@@ -1,21 +1,169 @@
+# ============================================================
+# CasinoOS Elite - .gitignore
+# Security: Prevents accidental secret exposure
+# Version: 1.0.0-elite
+# ============================================================
+
+# NEVER COMMIT ENVIRONMENT FILES (Critical Security)
+.env
+.env.*
+!.env.example
+!.env.test.example
+
+# Secrets and keys
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+secrets.json
+secret/
+private-key.txt
+
+# Node modules
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js build outputs
 .next/
 out/
 build/
 dist/
-coverage/
-.env
-.env.local
-.DS_Store
-*.log
-*.swp
-*.swo
 .cache/
-prisma/dev.db
-prisma/dev.db-journal
-target/
-**/target/
-.anchor/
-solana-test-validator.log
+
+# Production logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+*.tmp
+*.temp
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# Debug logs
+*.log
+debug.log
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# Solana
+test-ledger/
+*.so
+target/
+**/target/
+
+# Anchor
+anchor/target/
+programs/*/target/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Certificates
+*.crt
+*.key
+*.pem
+*.p12
+
+# Audit reports (generated on demand)
+audit-report.json
+license-report.json
+coverage-summary.json
+
+# Health check files
+.rollback_required
+.health_check_failed
+
+# 🔒 SECURITY: Block potential secret patterns
+# This prevents accidental commit of secrets
+*secret*
+*password*
+*credential*
+*private-key*
+*api-key*
+*token*
+*.p8
