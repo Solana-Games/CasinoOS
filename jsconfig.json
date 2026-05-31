@@ -1,8 +1,95 @@
 {
   "compilerOptions": {
+    // ============================================================
+    // BASE CONFIGURATION
+    // ============================================================
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
+    },
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    
+    // ============================================================
+    // STRICT TYPE CHECKING (Security & Reliability)
+    // ============================================================
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "exactOptionalPropertyTypes": true,
+    
+    // ============================================================
+    // MODULE RESOLUTION & INTEROPERABILITY
+    // ============================================================
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    
+    // ============================================================
+    // OUTPUT & DEBUGGING
+    // ============================================================
+    "skipLibCheck": true,          // Faster builds, safe for node_modules
+    "forceConsistentCasingInFileNames": true,
+    "removeComments": false,       // Keep comments in dev; Terser will strip in prod
+    "sourceMap": true,             // For Sentry error tracking
+    "inlineSources": false,
+    "declaration": false,
+    "declarationMap": false,
+    
+    // ============================================================
+    // NEXT.JS SPECIFIC (App Router compatible)
+    // ============================================================
+    "jsx": "preserve",
+    "allowJs": true,
+    "checkJs": false,              // Optional: enable for stricter checking
+    "incremental": true,
+    
+    // ============================================================
+    // PERFORMANCE
+    // ============================================================
+    "disableSizeLimit": false,
+    "preserveWatchOutput": true,
+    
+    // ============================================================
+    // SECURITY (Prevent unsafe operations)
+    // ============================================================
+    "suppressImplicitAnyIndexErrors": false,  // Force explicit any
+    "useUnknownInCatchVariables": true,       // Catch errors as unknown
+    "noErrorTruncation": false
+  },
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "scripts/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "dist",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
     }
   }
 }
